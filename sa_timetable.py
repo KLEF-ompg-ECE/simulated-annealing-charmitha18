@@ -1,133 +1,4 @@
-"""
-sa_timetable.py  -  Simulated Annealing: Exam Timetable Scheduling
-===================================================================
-This program is COMPLETE and works as-is. DO NOT rewrite it.
-
-Your task:
-  1. Read the code and understand how it works
-  2. Run the 2 experiments described in README.md
-  3. Save the plots and fill in your observations in README.md
-
-HOW TO RUN
-----------
-    python sa_timetable.py
-
-PROBLEM
--------
-Schedule 10 university exams into 5 time slots so that no student
-has two exams at the same time. A clash = two exams in the same slot
-for the same student. Goal: minimise total clashes to zero.
-"""
-
-import random
-import math
-import matplotlib.pyplot as plt
-import os
-
-# =============================================================================
-# PROBLEM DATA
-# =============================================================================
-
-EXAMS = [
-    "Mathematics",       # 0
-    "Physics",           # 1
-    "Chemistry",         # 2
-    "English",           # 3
-    "History",           # 4
-    "Computer Science",  # 5
-    "Economics",         # 6
-    "Biology",           # 7
-    "Statistics",        # 8
-    "Geography",         # 9
-]
-
-NUM_EXAMS = len(EXAMS)
-NUM_SLOTS = 5
-
-# Each row = one student's 3 exams (by index)
-STUDENTS = [
-    [0,1,5],[0,2,6],[1,3,7],[2,4,8],[3,5,9],
-    [0,4,7],[1,6,8],[2,5,9],[3,6,0],[4,7,1],
-    [5,8,2],[6,9,3],[7,0,4],[8,1,5],[9,2,6],
-    [0,3,8],[1,4,9],[2,7,5],[3,8,6],[4,9,7],
-    [0,5,2],[1,6,3],[2,7,4],[3,8,0],[4,9,1],
-    [5,0,6],[6,1,7],[7,2,8],[8,3,9],[9,4,0],
-]
-
-
-# =============================================================================
-# OBJECTIVE FUNCTION
-# =============================================================================
-
-def count_clashes(timetable):
-    """
-    Count the total number of clashes across all students.
-    A clash = one student has two exams assigned to the same slot.
-
-    Args:
-        timetable : list of length NUM_EXAMS
-                    timetable[i] = slot number assigned to exam i
-    Returns:
-        clashes (int) -- 0 is a perfect timetable
-    """
-    clashes = 0
-    for student_exams in STUDENTS:
-        seen_slots = set()
-        for exam in student_exams:
-            slot = timetable[exam]
-            if slot in seen_slots:
-                clashes += 1
-            seen_slots.add(slot)
-    return clashes
-
-
-# =============================================================================
-# NEIGHBOUR FUNCTION
-# =============================================================================
-
-def generate_neighbor(timetable):
-    """
-    Create a neighbouring timetable by moving ONE exam to a different slot.
-    """
-    new_tt = timetable[:]
-    exam = random.randint(0, NUM_EXAMS - 1)
-    current_slot = timetable[exam]
-    new_slot = random.choice([s for s in range(NUM_SLOTS) if s != current_slot])
-    new_tt[exam] = new_slot
-    return new_tt
-
-
-# =============================================================================
-# SIMULATED ANNEALING
-# =============================================================================
-
-def run_sa(
-    initial_temp   = 100.0,
-    cooling_rate   = 0.995,   # <- EXPERIMENT 2: change this value
-    min_temp       = 0.1,
-    max_iterations = 5000,
-    seed           = 42,
-):
-    """
-    Run Simulated Annealing to minimise exam timetable clashes.
-
-    KEY PARAMETERS
-    --------------
-    initial_temp : how hot SA starts -- higher means more random exploration early on
-    cooling_rate : how fast temperature drops each iteration
-                   close to 1.0 (e.g. 0.995) = slow cooling, thorough search
-                   further from 1 (e.g. 0.80) = fast cooling, quick but shallow
-
-    Returns
-    -------
-    best_timetable : list of slot assignments
-    best_clashes   : int -- clashes in the best solution found
-    clash_log      : list -- best clashes at each iteration (for plotting)
-    temp_log       : list -- temperature at each iteration (for plotting)
-    """
-    random.seed(seed)
-
-    current   = [random.randint(0, NUM_SLOTS - 1) for _ in range(NUM_EXAMS)]
+current   = [random.randint(0, NUM_SLOTS - 1) for _ in range(NUM_EXAMS)]
     current_c = count_clashes(current)
     best      = current[:]
     best_c    = current_c
@@ -198,7 +69,7 @@ def save_plot(clash_log, temp_log, filename, title):
 # RUN YOUR EXPERIMENTS HERE
 # =============================================================================
 
-if __name__ == "__main__":
+if name == "main":
 
     # ==========================================================================
     # EXPERIMENT 1 - Baseline
@@ -228,10 +99,29 @@ if __name__ == "__main__":
 
     # --- Copy and edit below this line ---
 
-    # tt2, clashes2, cl2, tl2 = run_sa(
-    #     initial_temp=100.0, cooling_rate=0.80,    # <- change this
-    #     min_temp=0.1, max_iterations=5000, seed=42
-    # )
-    # print_timetable(tt2)
-    # print(f"  Final clashes : {clashes2}")
-    # save_plot(cl2, tl2, "plots/experiment_2a.png", "cooling_rate=0.80")   # <- change filename
+    tt2, clashes2, cl2, tl2 = run_sa(
+        initial_temp=100.0, cooling_rate=0.80,    # <- change this
+        min_temp=0.1, max_iterations=5000, seed=42
+    )
+    print_timetable(tt2)
+    print(f"  Final clashes : {clashes2}")
+    save_plot(cl2, tl2, "plots/experiment_2a.png", "cooling_rate=0.80")   # <- change filename
+    
+    #-------------------
+    tt3, clashes3, cl3, tl3 = run_sa(
+        initial_temp=100.0, cooling_rate=0.95,    # <- change this
+        min_temp=0.1, max_iterations=5000, seed=42
+    )
+    print_timetable(tt3)
+    print(f"  Final clashes : {clashes3}")
+    save_plot(cl3, tl3, "plots/experiment_2b.png", "cooling_rate=0.95")
+    
+    #-------------------
+
+    tt4, clashes4, cl4, tl4 = run_sa(
+        initial_temp=100.0, cooling_rate=0.995,    # <- change this
+        min_temp=0.1, max_iterations=5000, seed=42
+    )
+    print_timetable(tt4)
+    print(f"  Final clashes : {clashes4}")
+    save_plot(cl4, tl4, "plots/experiment_2c.png", "cooling_rate=0.995")
